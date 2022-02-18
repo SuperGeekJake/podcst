@@ -8,7 +8,7 @@ export const Header: Component = () => {
   return (
     <header
       class="fixed top-0 left-0 z-10 flex items-center justify-start w-screen h-16 px-12 bg-bla hover:bg-black/95 transition-all"
-      data-component={Header.name}
+      data-component="Header"
     >
       <div class="absolute top-0 bottom-0 left-1/2 right-auto -translate-x-1/2 flex justify-center items-center">
         <a class="font-bold text-xl text-white uppercase" href="/">

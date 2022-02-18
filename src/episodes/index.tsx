@@ -9,7 +9,7 @@ export const Episodes: Component = () => {
   const [data] = createResource(() => getPodcast(searchParams.feed));
   const description = createMemo(() => getTextContent(data()?.description));
   return (
-    <main data-component={Episodes.name}>
+    <main data-component="Episodes">
       <div class="flex flex-row px-12 pt-36">
         <img
           class="w-1/3 h-auto flex-none"

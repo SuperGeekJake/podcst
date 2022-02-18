@@ -54,7 +54,7 @@ export const MediaBar: Component = () => {
         "hidden translate-y-24": state.status === "idle",
         "visible translate-y-0": state.status !== "idle",
       }}
-      data-component={MediaBar.name}
+      data-component="MediaBar"
     >
       <div class="flex-1 flex items-center">
         <Show when={!!artSrc()}>

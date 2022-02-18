@@ -34,11 +34,9 @@ export const SeekBar: Component<{
   return (
     <div
       class="group absolute top-[-0.875rem] left-24 right-0 h-8 cursor-pointer"
-      ref={(ref) => {
-        root = ref;
-      }}
+      ref={(ref) => (root = ref)}
       tabIndex={0}
-      data-component={SeekBar.name}
+      data-component="SeekBar"
       onClick={handleClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

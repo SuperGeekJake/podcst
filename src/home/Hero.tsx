@@ -20,7 +20,7 @@ export const Hero: Component = () => {
   return (
     <div
       class="relative h-96 md:h-[36rem] lg:h-[48rem] mb-12"
-      data-component={Hero.name}
+      data-component="Hero"
     >
       <Suspense fallback={<div>Loading...</div>}>
         <img
