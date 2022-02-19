@@ -14,6 +14,7 @@ export interface MediaState {
   playlist: App.Episode[];
   track: number;
   seek?: number;
+  seeking: boolean;
   duration?: number;
   volume: number;
   captions: boolean;
@@ -49,6 +50,7 @@ export const MediaProvider: Component = (props) => {
     playlist: [],
     track: 0,
     seek: 0,
+    seeking: false,
     duration: 0,
     volume: 100,
     captions: false,
@@ -79,7 +81,12 @@ export const MediaProvider: Component = (props) => {
       },
       seek: (value) => {
         if (!howl) return;
+        setState({
+          seek: value,
+          seeking: true,
+        });
         howl.seek(value);
+        setState({ seeking: false });
       },
       captions: () => {
         setState({ captions: !state.captions });
@@ -161,7 +168,7 @@ export const MediaProvider: Component = (props) => {
 
   let intervalID: ReturnType<typeof setInterval> | undefined;
   createEffect(() => {
-    if (state.status === "playing") {
+    if (state.status === "playing" && !state.seeking) {
       intervalID = setInterval(() => {
         // TODO: Should probably throw an error
         if (!howl) return intervalID && clearInterval(intervalID);
