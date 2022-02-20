@@ -1,16 +1,15 @@
 import {
   Component,
-  createEffect,
   createMemo,
   createSignal,
   onCleanup,
   onMount,
 } from "solid-js";
-import { Portal } from "solid-js/web";
+import { shift } from "@floating-ui/dom";
 
 import { FormattedDuration } from "@src/formatting";
-import { computePosition, shift } from "@floating-ui/dom";
-import { minMax } from "@src/utils";
+import { minMax, createMouseElement } from "@src/utils";
+import { Popup } from "@src/Popup";
 
 export const SeekBar: Component<{
   seek: number;
@@ -18,7 +17,6 @@ export const SeekBar: Component<{
   onChange: (val: number) => void;
 }> = (props) => {
   let root: HTMLDivElement | undefined;
-  let seekPreview: HTMLDivElement | undefined;
   const [isHovering, setHovering] = createSignal(false);
   const [isDragging, setDragging] = createSignal(false);
   const hasInteraction = createMemo(() => isHovering() || isDragging());
@@ -51,21 +49,9 @@ export const SeekBar: Component<{
   /**
    * Handle preview positioning
    */
-  const [previewPosition, setPreviewPosition] = createSignal<string>(
-    `transform: translate(0px, 0px)`
-  );
   const virtualElement = createMemo(() =>
     createMouseElement(mousePosition(), root?.getBoundingClientRect().top)
   );
-  createEffect(() => {
-    computePosition(
-      virtualElement(),
-      seekPreview as HTMLDivElement,
-      previewConfig
-    ).then(({ x, y }) => {
-      setPreviewPosition(`transform: translate(${x}px, ${y}px)`);
-    });
-  });
 
   /**
    * Handle seek bar positioning
@@ -94,46 +80,43 @@ export const SeekBar: Component<{
   });
 
   return (
-    <div
-      class="group absolute top-[-0.875rem] left-24 right-0 h-8 cursor-pointer"
-      ref={(ref) => (root = ref)}
-      tabIndex={0}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-      onMouseDown={onMouseDown}
-      data-component="SeekBar"
-    >
-      <div class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem]">
-        <div class="absolute top-0 right-0 bottom-0 left-0 bg-neutral-700 origin-[center_left]" />
-        <Portal>
+    <>
+      <div
+        class="group absolute top-[-0.875rem] left-24 right-0 h-8 cursor-pointer"
+        ref={(ref) => (root = ref)}
+        tabIndex={0}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        onMouseDown={onMouseDown}
+        data-component="SeekBar"
+      >
+        <div class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem]">
+          <div class="absolute top-0 right-0 bottom-0 left-0 bg-neutral-700 origin-[center_left]" />
           <div
-            ref={(ref) => (seekPreview = ref)}
-            class="absolute top-0 left-0 w-20 bg-black px-2 py-1 rounded-sm text-sm text-center"
-            classList={{
-              visible: hasInteraction(),
-              invisible: !hasInteraction(),
-            }}
-            style={previewPosition()}
-          >
-            <FormattedDuration value={seekPreviewValue()} />
-          </div>
-        </Portal>
+            class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem] bg-amber-600 origin-[center_left]"
+            style={`transform: scaleX(${seekProgress()})`}
+            data-component="SeekBar.progress"
+          />
+        </div>
         <div
-          class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem] bg-amber-600 origin-[center_left]"
-          style={`transform: scaleX(${seekProgress()})`}
-          data-component="SeekBar.progress"
+          class="absolute top-[9px] left-[-6px] w-[13px] h-[13px] bg-amber-500 rounded-full transition-opacity"
+          classList={{
+            "opacity-100": hasInteraction(),
+            "opacity-0": !hasInteraction(),
+          }}
+          style={`transform: translateX(${knobPosition()}px)`}
+          data-component="SeekBar.knob"
         />
       </div>
-      <div
-        class="absolute top-[9px] left-[-6px] w-[13px] h-[13px] bg-amber-500 rounded-full transition-opacity"
-        classList={{
-          "visible opacity-100": hasInteraction(),
-          "invisible opacity-0": !hasInteraction(),
-        }}
-        style={`transform: translateX(${knobPosition()}px)`}
-        data-component="SeekBar.knob"
-      />
-    </div>
+      <Popup
+        class="absolute top-0 left-0 w-20 bg-black px-2 py-1 rounded-sm text-sm text-center"
+        when={hasInteraction()}
+        target={virtualElement()}
+        options={previewConfig}
+      >
+        <FormattedDuration value={seekPreviewValue()} />
+      </Popup>
+    </>
   );
 };
 
@@ -141,16 +124,3 @@ const previewConfig = {
   placement: "top" as const,
   middleware: [shift()],
 };
-
-const createMouseElement = (x: number = 0, y: number = 0) => ({
-  getBoundingClientRect: () => ({
-    x,
-    y,
-    top: y,
-    left: x,
-    bottom: y,
-    right: x,
-    width: 0,
-    height: 0,
-  }),
-});
