@@ -16,8 +16,7 @@ import {
   PreviousSvg,
   NextSvg,
   VolumeSvg,
-  ClosedCaptionOffSvg,
-  ClosedCaptionOnSvg,
+  PlaylistSvg,
 } from "@src/svg";
 import { FormattedDuration } from "@src/formatting";
 
@@ -133,18 +132,10 @@ export const MediaBar: Component = () => {
           class="group p-1"
           role="switch"
           aria-checked="true"
-          aria-label="Closed Captions"
-          title="Closed Captions"
-          onClick={actions.captions}
+          aria-label="View Playlist"
+          title="View Playlist"
         >
-          <Switch>
-            <Match when={state.captions}>
-              <ClosedCaptionOnSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
-            </Match>
-            <Match when={!state.captions}>
-              <ClosedCaptionOffSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
-            </Match>
-          </Switch>
+          <PlaylistSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>
       </div>
 
@@ -165,4 +156,4 @@ export const MediaBar: Component = () => {
   );
 };
 
-const VOLUME_SCALE = 50;
+const VOLUME_SCALE = 100;

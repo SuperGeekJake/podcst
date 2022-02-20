@@ -17,7 +17,6 @@ export interface MediaState {
   seeking: boolean;
   duration?: number;
   volume: number;
-  captions: boolean;
 }
 
 type ContextValue = [
@@ -27,7 +26,6 @@ type ContextValue = [
     toggle: () => void;
     volume: (value: number) => void;
     seek: (value: number) => void;
-    captions: () => void;
   }
 ];
 
@@ -53,7 +51,6 @@ export const MediaProvider: Component = (props) => {
     seeking: false,
     duration: 0,
     volume: 100,
-    captions: false,
   });
   const value: ContextValue = [
     state,
@@ -87,9 +84,6 @@ export const MediaProvider: Component = (props) => {
         });
         howl.seek(value);
         setState({ seeking: false });
-      },
-      captions: () => {
-        setState({ captions: !state.captions });
       },
     },
   ];
