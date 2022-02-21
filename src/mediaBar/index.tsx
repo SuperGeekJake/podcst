@@ -40,8 +40,7 @@ export const MediaBar: Component = () => {
   const handleVolumeChange: JSX.EventHandler<HTMLInputElement, Event> = (
     evt
   ) => {
-    const value = parseInt(evt.currentTarget.value) / VOLUME_SCALE;
-    actions.volume(value);
+    actions.volume(parseInt(evt.currentTarget.value) / VOLUME_SCALE);
   };
   createEffect(() => {
     if (state.status === "loading") playRef.focus();
@@ -125,7 +124,7 @@ export const MediaBar: Component = () => {
             min="0"
             max={VOLUME_SCALE}
             value={volumeScaled()}
-            onChange={handleVolumeChange}
+            onInput={handleVolumeChange}
           />
         </label>
         <button
@@ -139,7 +138,7 @@ export const MediaBar: Component = () => {
         </button>
       </div>
 
-      <div class="absolute top-0 right-0 mt-2 mr-2 text-sm font-[monospace]">
+      <div class="absolute top-0 right-0 mt-2 mr-2 text-sm font-display">
         <FormattedDuration value={state.seek} />
         {" / "}
         <FormattedDuration value={state.duration} />
