@@ -160,7 +160,7 @@ export const MediaProvider: Component = (props) => {
     }
   });
 
-  let intervalID: ReturnType<typeof setInterval> | undefined;
+  let intervalID: number | undefined;
   createEffect(() => {
     if (state.status === "playing" && !state.seeking) {
       intervalID = setInterval(() => {
