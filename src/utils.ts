@@ -11,15 +11,18 @@ export const minMax = (num: number, min: number, max: number) =>
 export const generateClass = (...classes: Array<string | undefined>) =>
   classes.filter(Boolean).join(" ");
 
-export const createMouseElement = (x: number = 0, y: number = 0) => ({
+export const createMouseElement = (
+  clientX: number = 0,
+  clientY: number = 0
+) => ({
   getBoundingClientRect: () => ({
-    x,
-    y,
-    top: y,
-    left: x,
-    bottom: y,
-    right: x,
     width: 0,
     height: 0,
+    x: clientX,
+    y: clientY,
+    top: clientY,
+    left: clientX,
+    right: clientX,
+    bottom: clientY,
   }),
 });

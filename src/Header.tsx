@@ -20,6 +20,7 @@ export const Header: Component = () => {
         aria-expanded={menuVisiblity().toString() as "true" | "false"}
         aria-controls="menu"
         aria-label="Navigation Menu"
+        title="Navigation Menu"
         onClick={() => setMenuVisiblity(!menuVisiblity())}
       >
         <HamburgerSvg class="block w-5 h-auto fill-stone-300 group-hover:fill-white" />
@@ -29,6 +30,7 @@ export const Header: Component = () => {
         aria-expanded={searchVisiblity().toString() as "true" | "false"}
         aria-controls="search"
         aria-label="Search"
+        title="Search"
         onClick={() => setSearchVisiblity(!searchVisiblity())}
       >
         <MagnifySvg class="block w-5 h-auto fill-stone-300 group-hover:fill-white" />

@@ -2,7 +2,6 @@ import {
   Component,
   createEffect,
   createMemo,
-  JSX,
   Match,
   Show,
   Switch,
@@ -15,8 +14,10 @@ import {
   CycleSvg,
   PreviousSvg,
   NextSvg,
-  VolumeSvg,
   PlaylistSvg,
+  VolumeUpSvg,
+  VolumeOffSvg,
+  VolumeDownSvg,
 } from "@src/svg";
 import { FormattedDuration } from "@src/formatting";
 
@@ -37,11 +38,6 @@ export const MediaBar: Component = () => {
   const artSrc = createMemo(
     () => track()?.episodeArt || track()?.cover || undefined
   );
-  const handleVolumeChange: JSX.EventHandler<HTMLInputElement, Event> = (
-    evt
-  ) => {
-    actions.volume(parseInt(evt.currentTarget.value) / VOLUME_SCALE);
-  };
   createEffect(() => {
     if (state.status === "loading") playRef.focus();
   });
@@ -110,23 +106,41 @@ export const MediaBar: Component = () => {
       </div>
 
       <div class="flex-1 flex justify-end items-center mr-1 space-x1">
-        <label
-          class="group relative p-1 cursor-pointer"
-          aria-label="Volume"
-          title="Volume"
-        >
-          <VolumeSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+        <div class="group flex flex-row-reverse">
+          <button
+            class="p-1"
+            aria-label="Mute"
+            title="Mute"
+            aria-pressed={!state.volume}
+            onClick={() => {
+              actions.volume(state.volume ? 0 : 1);
+            }}
+          >
+            <Switch>
+              <Match when={state.volume === 0}>
+                <VolumeOffSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+              </Match>
+              <Match when={state.volume >= 0.5}>
+                <VolumeUpSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+              </Match>
+              <Match when={state.volume < 0.5}>
+                <VolumeDownSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+              </Match>
+            </Switch>
+          </button>
           <input
-            class="opacity-0 focus:opacity-100 w-0 focus:w-auto absolute top-1/2 right-full -translate-y-1/2 mr-1 transition-all"
+            class="opacity-0 group-hover:opacity-100 mr-1 transition-all"
             type="range"
             id="volume"
             name="volume"
             min="0"
             max={VOLUME_SCALE}
             value={volumeScaled()}
-            onInput={handleVolumeChange}
+            onInput={(evt) => {
+              actions.volume(parseInt(evt.currentTarget.value) / VOLUME_SCALE);
+            }}
           />
-        </label>
+        </div>
         <button
           class="group p-1"
           role="switch"
@@ -138,13 +152,13 @@ export const MediaBar: Component = () => {
         </button>
       </div>
 
-      <div class="absolute top-0 right-0 mt-2 mr-2 text-sm font-display">
-        <FormattedDuration value={state.seek} />
-        {" / "}
-        <FormattedDuration value={state.duration} />
-      </div>
-
       <Show when={hasLoadedTrack()}>
+        <div class="absolute top-0 right-0 mt-2 mr-2 text-sm font-display">
+          <FormattedDuration value={state.seek} />
+          {" / "}
+          <FormattedDuration value={state.duration} />
+        </div>
+
         <SeekBar
           seek={state.seek as number}
           duration={state.duration as number}
