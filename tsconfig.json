@@ -10,6 +10,7 @@
     "experimentalDecorators": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "types": ["jest"],
     "baseUrl": ".",
     "paths": {
       "@src/*": ["src/*"]
