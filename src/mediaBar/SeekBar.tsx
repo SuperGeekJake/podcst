@@ -8,7 +8,7 @@ import {
 import { shift } from "@floating-ui/dom";
 
 import { FormattedDuration } from "@src/formatting";
-import { minMax, createMouseElement } from "@src/utils";
+import { minMax, createPointerElement } from "@src/utils";
 import { Popup } from "@src/Popup";
 
 export const SeekBar: Component<{
@@ -21,36 +21,38 @@ export const SeekBar: Component<{
   const [isDragging, setDragging] = createSignal(false);
   const hasInteraction = createMemo(() => isHovering() || isDragging());
 
-  const onMouseDown = (event: MouseEvent) => {
+  const onPointerDown = (event: PointerEvent) => {
+    if (event.defaultPrevented || event.button !== 0) return;
+    // Avoid text selection
     event.preventDefault();
-    document.addEventListener("mouseup", onDocumentMouseUp);
+    document.addEventListener("pointerup", onDocumentPointerUp);
     setDragging(true);
   };
-  const onDocumentMouseUp = (event: MouseEvent) => {
+  const onDocumentPointerUp = (event: PointerEvent) => {
     event.preventDefault();
-    const rect = (root as HTMLElement).getBoundingClientRect();
-    const percentage = minMax((mousePosition() - rect.x) / rect.width, 0, 1);
+    const rect = (root as HTMLDivElement).getBoundingClientRect();
+    const percentage = minMax((pointerPosition() - rect.x) / rect.width, 0, 1);
     props.onChange(percentage * props.duration);
-    document.removeEventListener("mouseup", onDocumentMouseUp);
+    document.removeEventListener("pointerup", onDocumentPointerUp);
     setDragging(false);
   };
 
   /**
-   * Handle and set mouse position
+   * Handle and set pointer position
    */
-  const [mousePosition, setMousePosition] = createSignal<number>(0);
-  const onMouseMove = (event: MouseEvent) => {
+  const [pointerPosition, setPointerPosition] = createSignal<number>(0);
+  const onPointerMove = (event: PointerEvent) => {
     if (!hasInteraction()) return;
-    setMousePosition(event.clientX);
+    setPointerPosition(event.clientX);
   };
-  onMount(() => document.addEventListener("mousemove", onMouseMove));
-  onCleanup(() => document.removeEventListener("mousemove", onMouseMove));
+  onMount(() => document.addEventListener("pointermove", onPointerMove));
+  onCleanup(() => document.removeEventListener("pointermove", onPointerMove));
 
   /**
    * Handle preview positioning
    */
   const virtualElement = createMemo(() =>
-    createMouseElement(mousePosition(), root?.getBoundingClientRect().top)
+    createPointerElement(pointerPosition(), root?.getBoundingClientRect().top)
   );
 
   /**
@@ -58,14 +60,14 @@ export const SeekBar: Component<{
    */
   const seekProgress = createMemo(() => {
     if (!isDragging()) return props.seek / props.duration;
-    const rect = (root as HTMLElement).getBoundingClientRect();
-    return minMax((mousePosition() - rect.x) / rect.width, 0, 1);
+    const rect = (root as HTMLDivElement).getBoundingClientRect();
+    return minMax((pointerPosition() - rect.x) / rect.width, 0, 1);
   });
 
   /**
-   * Handle seek knob positioning
+   * Handle seek thumb positioning
    */
-  const knobPosition = createMemo(
+  const thumbPosition = createMemo(
     () => seekProgress() * (root?.getBoundingClientRect().width ?? 0)
   );
 
@@ -74,41 +76,48 @@ export const SeekBar: Component<{
    */
   const seekPreviewValue = createMemo(() => {
     if (!hasInteraction()) return 0;
-    const rect = (root as HTMLElement).getBoundingClientRect();
-    const percentage = minMax((mousePosition() - rect.x) / rect.width, 0, 1);
+    const rect = (root as HTMLDivElement).getBoundingClientRect();
+    const percentage = minMax((pointerPosition() - rect.x) / rect.width, 0, 1);
     return percentage * props.duration;
   });
 
   return (
     <>
       <div
+        data-component="SeekBar"
         class="group absolute top-[-0.875rem] left-24 right-0 h-8 cursor-pointer"
         ref={(ref) => (root = ref)}
         tabIndex={0}
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        onMouseDown={onMouseDown}
-        data-component="SeekBar"
+        onPointerEnter={() => setHovering(true)}
+        onPointerLeave={() => setHovering(false)}
+        onPointerDown={onPointerDown}
       >
-        <div class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem]">
-          <div class="absolute top-0 right-0 bottom-0 left-0 bg-neutral-700 origin-[center_left]" />
+        <div
+          data-component="Seekbar.container"
+          class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem]"
+        >
           <div
+            data-component="Seekbar.track"
+            class="absolute top-0 right-0 bottom-0 left-0 bg-neutral-700 origin-[center_left]"
+          />
+          <div
+            data-component="SeekBar.progess"
             class="absolute top-1/2 left-0 w-full h-[0.1875rem] mt-[-0.125rem] bg-amber-600 origin-[center_left]"
             style={`transform: scaleX(${seekProgress()})`}
-            data-component="SeekBar.progress"
           />
         </div>
         <div
+          data-component="SeekBar.thumb"
           class="absolute top-[9px] left-[-6px] w-[13px] h-[13px] bg-amber-500 rounded-full transition-opacity"
           classList={{
             "opacity-100": hasInteraction(),
             "opacity-0": !hasInteraction(),
           }}
-          style={`transform: translateX(${knobPosition()}px)`}
-          data-component="SeekBar.knob"
+          style={`transform: translateX(${thumbPosition()}px)`}
         />
       </div>
       <Popup
+        data-component="Seekbar.preview"
         class="absolute top-0 left-0 w-20 bg-black px-2 py-1 rounded-sm text-sm text-center"
         when={hasInteraction()}
         target={virtualElement()}

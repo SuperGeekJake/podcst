@@ -13,7 +13,7 @@ export const minMax = (num: number, min: number, max: number) =>
 export const generateClass = (...classes: Array<string | undefined>) =>
   classes.filter(Boolean).join(" ");
 
-export const createMouseElement = (
+export const createPointerElement = (
   clientX: number = 0,
   clientY: number = 0
 ) => ({
