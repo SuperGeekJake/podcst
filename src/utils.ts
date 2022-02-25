@@ -1,3 +1,5 @@
+import { createSignal, onMount } from "solid-js";
+
 const mockElement = document.createElement("div");
 export const getTextContent = (htmlStr: string | null | undefined) => {
   if (!htmlStr) return "";
@@ -26,3 +28,9 @@ export const createMouseElement = (
     bottom: clientY,
   }),
 });
+
+export const createMountSignal = () => {
+  const [state, setState] = createSignal(false);
+  onMount(() => setState(true));
+  return state;
+};
