@@ -1,11 +1,4 @@
-import {
-  Component,
-  createEffect,
-  createMemo,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { Component, createMemo, Match, onMount, Show, Switch } from "solid-js";
 
 import { useMediaContext } from "@src/mediaContext";
 import {
@@ -20,35 +13,47 @@ import {
   VolumeDownSvg,
 } from "@src/svg";
 import { FormattedDuration } from "@src/formatting";
+import { Slider } from "@src/Slider";
+import { createMountSignal } from "@src/utils";
 
 import { SeekBar } from "./SeekBar";
 
 export const MediaBar: Component = () => {
-  let playRef: HTMLButtonElement;
+  const [state] = useMediaContext();
+  return (
+    <Show when={state.status !== "idle"}>
+      <MediaBarContent />
+    </Show>
+  );
+};
+
+export const MediaBarContent: Component = () => {
+  let playRef: HTMLButtonElement | undefined;
+  const isMounted = createMountSignal();
   const [state, actions] = useMediaContext();
+
   const track = createMemo<App.Episode | undefined>(
     () => state.playlist[state.track]
   );
-  const hasLoadedTrack = createMemo(
-    () => state.status === "playing" || state.status === "paused"
-  );
+  const hasLoadedTrack = createMemo(() => state.status !== "loading");
   const hasPreviousTrack = createMemo(() => !!state.playlist[state.track - 1]);
   const hasNextTrack = createMemo(() => !!state.playlist[state.track + 1]);
-  const volumeScaled = createMemo(() => state.volume * VOLUME_SCALE);
   const artSrc = createMemo(
     () => track()?.episodeArt || track()?.cover || undefined
   );
-  createEffect(() => {
-    if (state.status === "loading") playRef.focus();
+
+  onMount(() => {
+    (playRef as HTMLButtonElement).focus();
   });
+
   return (
     <div
-      class="fixed bottom-0 left-0 right-0 z-10 flex justify-center items-stretch w-full h-24 bg-black transition-all"
-      classList={{
-        "hidden translate-y-24": state.status === "idle",
-        "visible translate-y-0": state.status !== "idle",
-      }}
       data-component="MediaBar"
+      class="fixed bottom-0 left-0 right-0 z-10 flex justify-center items-stretch w-full h-24 bg-black transition-transform"
+      classList={{
+        "translate-y-24": !isMounted(),
+        "translate-y-0": isMounted(),
+      }}
     >
       <div class="flex-1 flex items-center">
         <Show when={!!artSrc()}>
@@ -72,11 +77,11 @@ export const MediaBar: Component = () => {
           title="Previous song"
           disabled={!hasPreviousTrack()}
         >
-          <PreviousSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
+          <PreviousSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>
         <button
           class="group flex justify-center items-center p-1 mx-4"
-          ref={(ref: any) => (playRef = ref)}
+          ref={(ref) => (playRef = ref)}
           onClick={actions.toggle}
           disabled={!hasLoadedTrack()}
           aria-label="Play"
@@ -84,14 +89,14 @@ export const MediaBar: Component = () => {
         >
           <Switch
             fallback={
-              <CycleSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all animate-spin w-auto h-8" />
+              <CycleSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all animate-spin w-auto h-8" />
             }
           >
             <Match when={state.status === "paused"}>
-              <PlaySvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all w-auto h-8" />
+              <PlaySvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all w-auto h-8" />
             </Match>
             <Match when={state.status === "playing"}>
-              <PauseSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all w-auto h-8" />
+              <PauseSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all w-auto h-8" />
             </Match>
           </Switch>
         </button>
@@ -101,11 +106,11 @@ export const MediaBar: Component = () => {
           aria-label="Next song"
           title="Next song"
         >
-          <NextSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
+          <NextSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>
       </div>
 
-      <div class="flex-1 flex justify-end items-center mr-1 space-x1">
+      <div class="flex-1 gap-2 flex justify-end items-center mr-1 space-x1">
         <div class="group flex flex-row-reverse">
           <button
             class="p-1"
@@ -118,27 +123,21 @@ export const MediaBar: Component = () => {
           >
             <Switch>
               <Match when={state.volume === 0}>
-                <VolumeOffSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+                <VolumeOffSvg class="block fill-stone-400 group-hover:fill-white transition-all" />
               </Match>
               <Match when={state.volume >= 0.5}>
-                <VolumeUpSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+                <VolumeUpSvg class="block fill-stone-400 group-hover:fill-white transition-all" />
               </Match>
               <Match when={state.volume < 0.5}>
-                <VolumeDownSvg class="block fill-stone-300 group-hover:fill-white transition-all" />
+                <VolumeDownSvg class="block fill-stone-400 group-hover:fill-white transition-all" />
               </Match>
             </Switch>
           </button>
-          <input
-            class="opacity-0 group-hover:opacity-100 mr-1 transition-all"
-            type="range"
-            id="volume"
+          <Slider
+            class="w-28 mr-3 opacity-0 group-hover:opacity-100 focus:opacity-100"
             name="volume"
-            min="0"
-            max={VOLUME_SCALE}
-            value={volumeScaled()}
-            onInput={(evt) => {
-              actions.volume(parseInt(evt.currentTarget.value) / VOLUME_SCALE);
-            }}
+            value={state.volume}
+            onInput={actions.volume}
           />
         </div>
         <button
@@ -148,7 +147,7 @@ export const MediaBar: Component = () => {
           aria-label="View Playlist"
           title="View Playlist"
         >
-          <PlaylistSvg class="block fill-stone-300 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
+          <PlaylistSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>
       </div>
 
@@ -168,5 +167,3 @@ export const MediaBar: Component = () => {
     </div>
   );
 };
-
-const VOLUME_SCALE = 100;

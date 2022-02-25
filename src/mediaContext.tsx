@@ -73,8 +73,8 @@ export const MediaProvider: Component = (props) => {
         howl[state.status === "playing" ? "pause" : "play"]();
       },
       volume: (value) => {
-        Howler.volume(value);
         setState({ volume: value });
+        Howler.volume(value);
       },
       seek: (value) => {
         if (!howl) return;
