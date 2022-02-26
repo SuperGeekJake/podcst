@@ -1,6 +1,6 @@
 import { genres } from "@src/genres";
 import { useMediaContext } from "@src/mediaContext";
-import { ExplicitSvg } from "@src/svg";
+import { ExplicitSvg, PlaySvg } from "@src/svg";
 import { Howl } from "howler";
 import {
   Component,
@@ -20,7 +20,7 @@ export const Modal: Component<{
   podcast: App.Podcast;
   onMouseLeave: () => void;
 }> = (props) => {
-  const [mediaState] = useMediaContext();
+  const [mediaState, mediaActions] = useMediaContext();
   const categories = createMemo(() =>
     props.podcast.categories.map((id) => genres[id]).filter((n) => !!n)
   );
@@ -57,14 +57,18 @@ export const Modal: Component<{
   });
 
   return (
-    <div class="fixed top-0 left-0 w-screen h-screen">
+    <div
+      data-component="Preview.Modal.overlay"
+      class="fixed top-0 left-0 w-screen h-screen"
+    >
       <div
-        class="absolute z-20 w-[20%] translate-x-[-9999px] bg-slate-800"
+        data-component="Preview.Modal.base"
+        class="absolute z-20 w-[20%] translate-x-[-9999px] overflow-hidden rounded-xl"
         onMouseLeave={props.onMouseLeave}
         use:floating={props.target}
       >
         <img
-          class="w-full h-[75%]"
+          class="object-cover w-full h-full"
           src={props.podcast.cover}
           alt={props.listing.title}
           title={props.listing.title}
@@ -72,11 +76,11 @@ export const Modal: Component<{
           height="600"
           use:fullsize={props.listing.cover}
         />
-        <div class="flex flex-row flex-nowrap p-1 max-w-full">
+        <div class="absolute right-0 bottom-0 left-0 flex flex-row flex-nowrap p-1 bg-black/50">
           <ul class="flex-1 flex flex-row flex-nowrap gap-1 overflow-hidden">
             <For each={categories()}>
               {(category) => (
-                <li class="text-xs font-display font-bold uppercase bg-white/20 rounded-full px-2 py-1 whitespace-nowrap">
+                <li class="text-xs font-display font-bold uppercase bg-black/20 rounded-full px-2 py-1 whitespace-nowrap">
                   {category}
                 </li>
               )}
@@ -86,6 +90,22 @@ export const Modal: Component<{
             <ExplicitSvg class="flex-none w-auto h-6 fill-white" />
           </Show>
         </div>
+        <button
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group flex justify-center items-center w-24 h-24 bg-black/50 hover:bg-black focus:bg-black rounded-full transition-all"
+          aria-label="Play"
+          title="Play"
+          onClick={() => {
+            if (howl) {
+              howl.unload();
+              howl = null;
+            }
+
+            mediaActions.load(props.listing.episodes);
+            props.onMouseLeave();
+          }}
+        >
+          <PlaySvg class="w-auto h-14 fill-white/50 group-hover:fill-white group-focus:fill-white" />
+        </button>
       </div>
     </div>
   );

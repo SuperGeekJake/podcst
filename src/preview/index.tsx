@@ -2,7 +2,6 @@ import { Component, createSignal, onCleanup, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { getPodcast } from "@src/api";
-import { useMediaContext } from "@src/mediaContext";
 import { Modal } from "./Modal";
 import { registerDirectives, forwardRef } from "@src/directives";
 
@@ -13,18 +12,15 @@ export const Preview: Component<{
 }> = (props) => {
   let root: HTMLAnchorElement;
   let isActive: boolean = false;
-
-  const [mediaState] = useMediaContext();
-  const [showModal, setModalVisibility] = createSignal<
+  const [modelData, setModalData] = createSignal<
     App.EpisodeListing | undefined
   >();
 
   const handleMouseEnter = async () => {
     isActive = true;
-    if (mediaState.status !== "idle") return;
     const data = await getPodcast(props.podcast.feed);
     if (!isActive) return;
-    setModalVisibility({ ...data, categories: props.podcast.categories });
+    setModalData({ ...data, categories: props.podcast.categories });
   };
 
   const handleMouseLeave = () => {
@@ -49,19 +45,20 @@ export const Preview: Component<{
         use:forwardRef={props.ref}
       >
         <img
+          class="rounded-lg"
           src={props.podcast.cover}
           alt={props.podcast.title}
           title={props.podcast.title}
         />
       </a>
-      <Show when={showModal()}>
+      <Show when={modelData()}>
         <Portal>
           <Modal
             // @ts-ignore
             target={root}
-            listing={showModal() as App.EpisodeListing}
+            listing={modelData() as App.EpisodeListing}
             podcast={props.podcast}
-            onMouseLeave={() => setModalVisibility()}
+            onMouseLeave={() => setModalData()}
           />
         </Portal>
       </Show>
