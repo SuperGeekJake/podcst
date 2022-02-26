@@ -76,6 +76,7 @@ export const MediaBarContent: Component = () => {
           aria-label="Previous song"
           title="Previous song"
           disabled={!hasPreviousTrack()}
+          onClick={() => actions.back()}
         >
           <PreviousSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>
@@ -105,6 +106,7 @@ export const MediaBarContent: Component = () => {
           disabled={!hasNextTrack()}
           aria-label="Next song"
           title="Next song"
+          onClick={() => actions.next()}
         >
           <NextSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>

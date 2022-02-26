@@ -26,6 +26,8 @@ type ContextValue = [
     toggle: () => void;
     volume: (value: number) => void;
     seek: (value: number) => void;
+    next: () => void;
+    back: () => void;
   }
 ];
 
@@ -84,6 +86,26 @@ export const MediaProvider: Component = (props) => {
         });
         howl.seek(value);
         setState({ seeking: false });
+      },
+      next: () => {
+        if (!howl || state.track + 1 === state.playlist.length) return;
+        setState({
+          status: "loading",
+          error: null,
+          track: state.track + 1,
+          seek: 0,
+          duration: 0,
+        });
+      },
+      back: () => {
+        if (!howl || state.track - 1 < 0) return;
+        setState({
+          status: "loading",
+          error: null,
+          track: state.track - 1,
+          seek: 0,
+          duration: 0,
+        });
       },
     },
   ];
