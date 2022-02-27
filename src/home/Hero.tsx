@@ -1,6 +1,6 @@
 import { Component, Suspense, createResource, createMemo } from "solid-js";
 
-import { useMediaContext } from "@src/mediaContext";
+import { useMediaContext } from "@src/media";
 import { PlaySvg } from "@src/svg";
 import { getTopEpisode } from "@src/api";
 import { getTextContent } from "@src/utils";

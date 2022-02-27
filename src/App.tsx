@@ -3,8 +3,7 @@ import { Router, Routes, Route } from "solid-app-router";
 
 import { Header } from "./Header";
 import { Home } from "./home";
-import { MediaBar } from "./mediaBar";
-import { MediaProvider } from "./mediaContext";
+import { MediaProvider, MediaControls } from "./media";
 import { Episodes } from "./episodes";
 
 const App: Component = () => {
@@ -17,7 +16,7 @@ const App: Component = () => {
           <Route path="/" element={<Home />} />
           <Route path="/*all" element={<div>Page Not Found</div>} />
         </Routes>
-        <MediaBar />
+        <MediaControls />
       </MediaProvider>
     </Router>
   );

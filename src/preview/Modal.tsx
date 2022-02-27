@@ -1,5 +1,5 @@
 import { genres } from "@src/genres";
-import { useMediaContext } from "@src/mediaContext";
+import { useMediaContext } from "@src/media";
 import { ExplicitSvg, PlaySvg } from "@src/svg";
 import { Howl } from "howler";
 import {

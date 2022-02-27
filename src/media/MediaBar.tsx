@@ -1,6 +1,5 @@
 import { Component, createMemo, Match, onMount, Show, Switch } from "solid-js";
 
-import { useMediaContext } from "@src/mediaContext";
 import {
   PlaySvg,
   PauseSvg,
@@ -17,17 +16,9 @@ import { Slider } from "@src/Slider";
 import { createMountSignal } from "@src/utils";
 
 import { SeekBar } from "./SeekBar";
+import { useMediaContext } from "./context";
 
 export const MediaBar: Component = () => {
-  const [state] = useMediaContext();
-  return (
-    <Show when={state.status !== "idle"}>
-      <MediaBarContent />
-    </Show>
-  );
-};
-
-export const MediaBarContent: Component = () => {
   let playRef: HTMLButtonElement | undefined;
   const isMounted = createMountSignal();
   const [state, actions] = useMediaContext();
