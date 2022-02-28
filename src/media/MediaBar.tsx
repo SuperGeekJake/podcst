@@ -13,14 +13,12 @@ import {
 } from "@src/svg";
 import { FormattedDuration } from "@src/formatting";
 import { Slider } from "@src/Slider";
-import { createMountSignal } from "@src/utils";
 
 import { SeekBar } from "./SeekBar";
 import { useMediaContext } from "./context";
 
 export const MediaBar: Component = () => {
   let playRef: HTMLButtonElement | undefined;
-  const isMounted = createMountSignal();
   const [state, actions] = useMediaContext();
 
   const track = createMemo<App.Episode | undefined>(
@@ -41,10 +39,6 @@ export const MediaBar: Component = () => {
     <div
       data-component="MediaBar"
       class="fixed bottom-0 left-0 right-0 z-10 flex justify-center items-stretch w-full h-24 bg-black transition-transform"
-      classList={{
-        "translate-y-24": !isMounted(),
-        "translate-y-0": isMounted(),
-      }}
     >
       <div class="flex-1 flex items-center">
         <Show when={!!artSrc()}>
@@ -139,6 +133,7 @@ export const MediaBar: Component = () => {
           aria-checked="true"
           aria-label="View Playlist"
           title="View Playlist"
+          onClick={() => actions.togglePlaylist(!state.showPlaylist)}
         >
           <PlaylistSvg class="block fill-stone-400 group-hover:fill-white group-disabled:fill-stone-600 transition-all" />
         </button>

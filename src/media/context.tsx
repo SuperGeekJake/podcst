@@ -9,25 +9,27 @@ import { createStore, DeepReadonly } from "solid-js/store";
 import { Howl, Howler, HowlErrorCallback } from "howler";
 
 export interface MediaState {
-  status: "idle" | "loading" | "playing" | "paused";
+  duration?: number;
   error: Error | null;
   playlist: App.Episode[];
-  track: number;
   seek?: number;
   seeking: boolean;
-  duration?: number;
+  showPlaylist: boolean;
+  status: "idle" | "loading" | "playing" | "paused";
+  track: number;
   volume: number;
 }
 
 type ContextValue = [
   DeepReadonly<MediaState>,
   {
-    load: (playlist: App.Episode[]) => void;
-    toggle: () => void;
-    volume: (value: number) => void;
-    seek: (value: number) => void;
-    next: () => void;
     back: () => void;
+    load: (playlist: App.Episode[]) => void;
+    next: () => void;
+    seek: (value: number) => void;
+    toggle: () => void;
+    togglePlaylist: (value: boolean) => void;
+    volume: (value: number) => void;
   }
 ];
 
@@ -45,38 +47,50 @@ export const useMediaContext = () => {
 export const MediaProvider: Component = (props) => {
   let howl: Howl | null;
   const [state, setState] = createStore<MediaState>({
-    status: "idle",
+    duration: 0,
     error: null,
     playlist: [],
-    track: 0,
     seek: 0,
     seeking: false,
-    duration: 0,
+    showPlaylist: false,
+    status: "idle",
+    track: 0,
     volume: 100,
   });
   const value: ContextValue = [
     state,
     {
+      back: () => {
+        if (state.track - 1 < 0) return;
+        setState({
+          duration: 0,
+          error: null,
+          seek: 0,
+          status: "loading",
+          track: state.track - 1,
+        });
+      },
       load: (playlist) => {
         const volume = Howler.volume();
         setState({
-          status: "loading",
-          error: null,
-          track: 0,
-          seek: 0,
           duration: 0,
+          error: null,
           playlist,
+          seek: 0,
+          status: "loading",
+          track: 0,
           volume,
         });
       },
-      toggle: () => {
-        if (!howl) return;
-        if (state.status !== "playing" && state.status !== "paused") return;
-        howl[state.status === "playing" ? "pause" : "play"]();
-      },
-      volume: (value) => {
-        setState({ volume: value });
-        Howler.volume(value);
+      next: () => {
+        if (state.track + 1 === state.playlist.length) return;
+        setState({
+          duration: 0,
+          error: null,
+          seek: 0,
+          status: "loading",
+          track: state.track + 1,
+        });
       },
       seek: (value) => {
         if (!howl) return;
@@ -87,25 +101,20 @@ export const MediaProvider: Component = (props) => {
         howl.seek(value);
         setState({ seeking: false });
       },
-      next: () => {
-        if (!howl || state.track + 1 === state.playlist.length) return;
+      toggle: () => {
+        if (!howl) return;
+        if (state.status !== "playing" && state.status !== "paused") return;
+        howl[state.status === "playing" ? "pause" : "play"]();
+      },
+      togglePlaylist: (value) => {
+        if (state.playlist.length === 0 && value) return;
         setState({
-          status: "loading",
-          error: null,
-          track: state.track + 1,
-          seek: 0,
-          duration: 0,
+          showPlaylist: value,
         });
       },
-      back: () => {
-        if (!howl || state.track - 1 < 0) return;
-        setState({
-          status: "loading",
-          error: null,
-          track: state.track - 1,
-          seek: 0,
-          duration: 0,
-        });
+      volume: (value) => {
+        setState({ volume: value });
+        Howler.volume(value);
       },
     },
   ];
@@ -130,10 +139,10 @@ export const MediaProvider: Component = (props) => {
     const seek = (howl.seek() as Seek) || 0;
     const duration = howl.duration();
     setState({
-      status: "playing",
       error: null,
-      seek,
+      status: "playing",
       duration,
+      seek,
     });
   };
   const handleEnd = () => {
@@ -145,11 +154,11 @@ export const MediaProvider: Component = (props) => {
       }
 
       return {
-        status: "loading",
-        error: null,
-        track: prevState.track + 1,
-        seek: 0,
         duration: 0,
+        error: null,
+        seek: 0,
+        status: "loading",
+        track: prevState.track + 1,
       };
     });
   };
