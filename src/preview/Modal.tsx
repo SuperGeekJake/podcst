@@ -1,19 +1,22 @@
-import { genres } from "@src/genres";
-import { useMediaContext } from "@src/media";
-import { ExplicitSvg, PlaySvg } from "@src/svg";
-import { Howl } from "howler";
 import {
   Component,
   createEffect,
   createMemo,
+  createSignal,
   For,
   onCleanup,
   onMount,
   Show,
 } from "solid-js";
-import { registerDirectives, floating, fullsize } from "@src/directives";
+import { Howl } from "howler";
+import { getScrollParents } from "@floating-ui/dom";
 
-registerDirectives(floating, fullsize);
+import { registerDirectives, fullsize } from "@src/directives";
+import { genres } from "@src/genres";
+import { useMediaContext } from "@src/media";
+import { ExplicitSvg, PlaySvg } from "@src/svg";
+
+registerDirectives(fullsize);
 export const Modal: Component<{
   target: HTMLElement;
   listing: App.EpisodeListing;
@@ -56,56 +59,98 @@ export const Modal: Component<{
     howl = null;
   });
 
+  let container: HTMLDivElement | undefined;
+  let scrollParents: (Element | Window | VisualViewport)[];
+  const [coords, setCoords] = createSignal<[number, number] | undefined>();
+  function update() {
+    const refRect = props.target.getBoundingClientRect();
+    const elRect = (container as HTMLDivElement).getBoundingClientRect();
+    const x = Math.round(refRect.x + (refRect.width - elRect.width) / 2);
+    const y = Math.round(refRect.y + (refRect.height - elRect.height) / 2);
+    setCoords([x, y]);
+  }
+
+  onMount(() => {
+    scrollParents = [
+      ...getScrollParents(props.target),
+      ...getScrollParents(container as HTMLDivElement),
+    ];
+    scrollParents.forEach((el) => {
+      el.addEventListener("scroll", update);
+      el.addEventListener("resize", update);
+    });
+
+    update();
+  });
+
+  onCleanup(() => {
+    scrollParents.forEach((el) => {
+      el.removeEventListener("scroll", update);
+      el.removeEventListener("resize", update);
+    });
+  });
+
   return (
     <div
       data-component="Preview.Modal.overlay"
       class="fixed top-0 left-0 w-screen h-screen"
     >
       <div
-        data-component="Preview.Modal.base"
-        class="absolute z-20 w-[20%] translate-x-[-9999px] overflow-hidden rounded-xl"
-        onMouseLeave={props.onMouseLeave}
-        use:floating={props.target}
+        data-component="Preview.Modal.container"
+        ref={(ref) => (container = ref)}
+        class="absolute z-20 w-1/5 aspect-square"
+        style={`transform: translate(${coords()?.[0] || 0}px,${
+          coords()?.[1] || 0
+        }px)`}
       >
-        <img
-          class="object-cover w-full h-full"
-          src={props.podcast.cover}
-          alt={props.listing.title}
-          title={props.listing.title}
-          width="600"
-          height="600"
-          use:fullsize={props.listing.cover}
-        />
-        <div class="absolute right-0 bottom-0 left-0 flex flex-row flex-nowrap p-1 bg-black/50">
-          <ul class="flex-1 flex flex-row flex-nowrap gap-1 overflow-hidden">
-            <For each={categories()}>
-              {(category) => (
-                <li class="text-xs font-display font-bold uppercase bg-black/20 rounded-full px-2 py-1 whitespace-nowrap">
-                  {category}
-                </li>
-              )}
-            </For>
-          </ul>
-          <Show when={props.listing.explicit}>
-            <ExplicitSvg class="flex-none w-auto h-6 fill-white" />
-          </Show>
-        </div>
-        <button
-          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group flex justify-center items-center w-24 h-24 bg-black/50 hover:bg-black focus:bg-black rounded-full transition-all"
-          aria-label="Play"
-          title="Play"
-          onClick={() => {
-            if (howl) {
-              howl.unload();
-              howl = null;
-            }
-
-            mediaActions.load(props.listing.episodes);
-            props.onMouseLeave();
+        <div
+          data-component="Preview.Modal.base"
+          class="w-full h-full overflow-hidden rounded-xl transition-transform"
+          classList={{
+            "scale-75": !coords(),
+            "scale-100": !!coords(),
           }}
+          onMouseLeave={props.onMouseLeave}
         >
-          <PlaySvg class="w-auto h-14 fill-white/50 group-hover:fill-white group-focus:fill-white" />
-        </button>
+          <img
+            class="object-cover w-full h-full"
+            src={props.podcast.cover}
+            alt={props.listing.title}
+            width="600"
+            height="600"
+            use:fullsize={props.listing.cover}
+          />
+          <div class="absolute right-0 bottom-0 left-0 flex flex-row flex-nowrap p-1 bg-black/50">
+            <ul class="flex-1 flex flex-row flex-nowrap gap-1 overflow-hidden">
+              <For each={categories()}>
+                {(category) => (
+                  <li class="text-xs font-display font-bold uppercase bg-black/20 rounded-full px-2 py-1 whitespace-nowrap">
+                    {category}
+                  </li>
+                )}
+              </For>
+            </ul>
+            <Show when={props.listing.explicit}>
+              <ExplicitSvg class="flex-none w-auto h-6 fill-white" />
+            </Show>
+          </div>
+          <button
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group flex justify-center items-center w-24 h-24 bg-black/50 hover:bg-black focus:bg-black rounded-full transition-all"
+            aria-label="Play"
+            title="Play"
+            onClick={() => {
+              if (howl) {
+                howl.unload();
+                howl = null;
+              }
+
+              mediaActions.load(props.listing.episodes);
+              props.onMouseLeave();
+            }}
+          >
+            <PlaySvg class="w-auto h-14 fill-white/50 group-hover:fill-white group-focus:fill-white" />
+          </button>
+        </div>
       </div>
     </div>
   );
