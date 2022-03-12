@@ -7,6 +7,7 @@ import {
   onCleanup,
   onMount,
   Show,
+  batch,
 } from "solid-js";
 import { Howl } from "howler";
 import { getScrollParents } from "@floating-ui/dom";
@@ -61,13 +62,30 @@ export const Modal: Component<{
 
   let container: HTMLDivElement | undefined;
   let scrollParents: (Element | Window | VisualViewport)[];
+  const [offset, setOffset] = createSignal<number>(0);
   const [coords, setCoords] = createSignal<[number, number] | undefined>();
   function update() {
+    const offset =
+      (props.target.nextElementSibling &&
+        !isInViewport(props.target.nextElementSibling) &&
+        1) ||
+      (props.target.previousElementSibling &&
+        !isInViewport(props.target.previousElementSibling) &&
+        -1) ||
+      0;
     const refRect = props.target.getBoundingClientRect();
     const elRect = (container as HTMLDivElement).getBoundingClientRect();
-    const x = Math.round(refRect.x + (refRect.width - elRect.width) / 2);
+    const x =
+      offset === 0
+        ? Math.round(refRect.x + (refRect.width - elRect.width) / 2)
+        : offset === 1
+        ? refRect.right - elRect.width
+        : refRect.x;
     const y = Math.round(refRect.y + (refRect.height - elRect.height) / 2);
-    setCoords([x, y]);
+    batch(() => {
+      setOffset(offset);
+      setCoords([x, y]);
+    });
   }
 
   onMount(() => {
@@ -99,9 +117,7 @@ export const Modal: Component<{
         data-component="Preview.Modal.container"
         ref={(ref) => (container = ref)}
         class="absolute z-20 w-1/5 aspect-square"
-        style={`transform: translate(${coords()?.[0] || 0}px,${
-          coords()?.[1] || 0
-        }px)`}
+        style={getContainerStyles(coords())}
       >
         <div
           data-component="Preview.Modal.base"
@@ -109,6 +125,9 @@ export const Modal: Component<{
           classList={{
             "scale-75": !coords(),
             "scale-100": !!coords(),
+            "origin-center": offset() === 0,
+            "origin-right": offset() === 1,
+            "origin-left": offset() === -1,
           }}
           onMouseLeave={props.onMouseLeave}
         >
@@ -162,4 +181,17 @@ const calcMiddleSprite = (duration: number): [number, number] => {
   const start = Math.max(0, center - PREVIEW_DURATION / 2) * 1000;
   const end = Math.min(duration, center + PREVIEW_DURATION / 2) * 1000;
   return [start, end - start];
+};
+
+const getContainerStyles = (coords?: [number, number]) => {
+  if (!coords) return "transform: translate(-100%, -100%)";
+  return `transform: translate(${coords[0]}px, ${coords[1]}px)`;
+};
+
+const isInViewport = (element: Element) => {
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.left >= 0 &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
 };
