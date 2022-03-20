@@ -1,7 +1,7 @@
 /**
  * Shared Explicit state type
  */
-type ExplicitState = "explicit" | "cleaned" | "notExplicit";
+type ExplicitState = "explicit" | "cleaned" | "notExplicit" | boolean;
 
 /**
  * iTunes typings
@@ -169,7 +169,7 @@ declare namespace App {
   /**
    * Episode listing
    */
-  interface EpisodeListing {
+  interface EpisodeListing extends App.Podcast {
     author: string;
     cover: string;
     description: string;

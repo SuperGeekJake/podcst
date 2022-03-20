@@ -4,6 +4,7 @@ import { useSearchParams } from "solid-app-router";
 import { getPodcast } from "@src/api";
 import { getTextContent } from "@src/utils";
 import { Button } from "@src/ui/Button";
+import { SubscribeButton } from "@src/subscriptions";
 
 export const Episodes: Component = () => {
   const [searchParams] = useSearchParams();
@@ -23,12 +24,8 @@ export const Episodes: Component = () => {
           <h2 class="text-4xl font-display">{data()?.author}</h2>
           <div class="max-w-4xl">{description()}</div>
           <div class="flex gap-4">
-            <Button>
-              Subscribe
-            </Button>
-            <Button>
-              Share
-            </Button>
+            <SubscribeButton feed={searchParams.feed} podcast={data()!} />
+            <Button>Share</Button>
           </div>
         </div>
       </div>

@@ -9,6 +9,6 @@ import { PodcastsGrid } from "./PodcastsGrid";
 export const CategoryTop: Component = () => {
   const [data] = createResource(getTopPodcasts);
   return (
-    <PodcastsGrid title="Popular" podcasts={data} />
+    <PodcastsGrid title="Popular" podcasts={data() || []} />
   );
 };

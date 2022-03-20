@@ -3,15 +3,15 @@ import {
   createMemo,
   createSignal,
   For,
-  Resource,
 } from "solid-js";
+import { DeepReadonly } from "solid-js/store";
 
 import { ChevronLeftSvg, ChevronRightSvg } from "@src/svg";
 import { Preview } from "@src/preview";
 
 interface PodcastsGridProps {
   title: string;
-  podcasts: Resource<App.Podcast[] | undefined>;
+  podcasts: DeepReadonly<App.Podcast[]>;
 }
 
 export const PodcastsGrid: Component<PodcastsGridProps> = ({
@@ -26,7 +26,7 @@ export const PodcastsGrid: Component<PodcastsGridProps> = ({
     const index = Math.max(
       Math.min(
         pagination() + direction * COLUMN_COUNT,
-        (podcasts() || []).length - 1
+        podcasts.length - 1
       ),
       0
     );
@@ -43,7 +43,7 @@ export const PodcastsGrid: Component<PodcastsGridProps> = ({
 
   const showLeftNavigation = createMemo(() => pagination() > 0);
   const showRightNavigation = createMemo(
-    () => pagination() < (podcasts() || []).length - 1
+    () => pagination() < podcasts.length - 1
   );
 
   return (
@@ -64,11 +64,11 @@ export const PodcastsGrid: Component<PodcastsGridProps> = ({
           ref={(ref) => (carousel = ref)}
           class="flex flex-nowrap overflow-x-hidden scroll-smooth px-12 gap-[1%]"
         >
-          <For each={podcasts()} fallback={<div>Loading...</div>}>
+          <For each={podcasts}>
             {(podcast, index) => (
               <Preview
                 ref={(ref) => (articles[index()] = ref)}
-                podcast={podcast}
+                podcast={podcast as App.Podcast}
               />
             )}
           </For>

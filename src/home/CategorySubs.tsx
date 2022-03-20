@@ -1,14 +1,14 @@
 import {
   Component,
-  createResource,
 } from "solid-js";
 
-import { getTopPodcasts } from "@src/api";
 import { PodcastsGrid } from "./PodcastsGrid";
+import { useSubscriptionsContext } from "@src/subscriptions";
 
 export const CategorySubs: Component = () => {
-  const [data] = createResource(getTopPodcasts);
+  const store = useSubscriptionsContext();
+  const { subscriptionList } = store;
   return (
-    <PodcastsGrid title="Subscriptions" podcasts={data} />
+    <PodcastsGrid title="Subscriptions" podcasts={subscriptionList()} />
   );
 };
