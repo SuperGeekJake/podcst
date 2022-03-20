@@ -27,7 +27,7 @@ export const Modal: Component<{
 }> = (props) => {
   const [mediaState, mediaActions] = useMediaContext();
   const categories = createMemo(() =>
-    props.podcast.categories.map((id) => genres[id]).filter((n) => !!n)
+    props.podcast.categories?.map((id) => genres[id]).filter((n) => !!n)
   );
 
   let howl: Howl | null;

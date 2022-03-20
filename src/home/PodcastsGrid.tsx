@@ -14,10 +14,7 @@ interface PodcastsGridProps {
   podcasts: DeepReadonly<App.Podcast[]>;
 }
 
-export const PodcastsGrid: Component<PodcastsGridProps> = ({
-  title,
-  podcasts,
-}) => {
+export const PodcastsGrid: Component<PodcastsGridProps> = (props) => {
   let carousel: HTMLDivElement;
   let articles: HTMLElement[] = [];
   const [pagination, setPagination] = createSignal<number>(0);
@@ -26,7 +23,7 @@ export const PodcastsGrid: Component<PodcastsGridProps> = ({
     const index = Math.max(
       Math.min(
         pagination() + direction * COLUMN_COUNT,
-        podcasts.length - 1
+        props.podcasts.length - 1
       ),
       0
     );
@@ -43,12 +40,12 @@ export const PodcastsGrid: Component<PodcastsGridProps> = ({
 
   const showLeftNavigation = createMemo(() => pagination() > 0);
   const showRightNavigation = createMemo(
-    () => pagination() < podcasts.length - 1
+    () => pagination() < props.podcasts.length - 1
   );
 
   return (
     <div class="group">
-      <h3 class="font-display text-2xl ml-12 mb-4">{title}</h3>
+      <h3 class="font-display text-2xl ml-12 mb-4">{props.title}</h3>
       <div class="relative mb-12">
         <button
           classList={{
@@ -64,7 +61,7 @@ export const PodcastsGrid: Component<PodcastsGridProps> = ({
           ref={(ref) => (carousel = ref)}
           class="flex flex-nowrap overflow-x-hidden scroll-smooth px-12 gap-[1%]"
         >
-          <For each={podcasts}>
+          <For each={props.podcasts}>
             {(podcast, index) => (
               <Preview
                 ref={(ref) => (articles[index()] = ref)}
