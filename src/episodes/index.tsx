@@ -12,7 +12,7 @@ export const Episodes: Component = () => {
     <main data-component="Episodes">
       <div class="flex flex-row px-12 pt-36">
         <img
-          class="w-1/3 h-auto flex-none"
+          class="w-1/3 h-auto flex-none mr-8"
           src={data()?.cover}
           alt={data()?.cover}
           title={data()?.cover}
@@ -20,7 +20,7 @@ export const Episodes: Component = () => {
         <div class="flex-1">
           <h1 class="text-6xl font-display font-bold">{data()?.title}</h1>
           <h2 class="text-4xl font-display">{data()?.author}</h2>
-          <div class="">{description()}</div>
+          <div class="max-w-4xl">{description()}</div>
         </div>
       </div>
     </main>
