@@ -181,6 +181,14 @@ declare namespace App {
     title: string;
   }
 
+  export interface PodcastEpisodesSubInfo extends EpisodeListing {
+    feed: string;
+  }
+
+  export interface SubscriptionsMap {
+    [feed: string]: PodcastEpisodesSubInfo;
+  }
+
   /**
    * Podcasts Search result interface
    */
