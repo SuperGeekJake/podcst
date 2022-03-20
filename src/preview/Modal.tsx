@@ -9,6 +9,7 @@ import {
   Show,
   batch,
 } from "solid-js";
+import { Link } from "solid-app-router";
 import { Howl } from "howler";
 import { getScrollParents } from "@floating-ui/dom";
 
@@ -131,14 +132,16 @@ export const Modal: Component<{
           }}
           onMouseLeave={props.onMouseLeave}
         >
-          <img
-            class="object-cover w-full h-full"
-            src={props.podcast.cover}
-            alt={props.listing.title}
-            width="600"
-            height="600"
-            use:fullsize={props.listing.cover}
-          />
+          <Link href={`/episodes?feed=${props.podcast.feed}`}>
+            <img
+              class="object-cover w-full h-full"
+              src={props.podcast.cover}
+              alt={props.listing.title}
+              width="600"
+              height="600"
+              use:fullsize={props.listing.cover}
+            />
+          </Link>
           <div class="absolute right-0 bottom-0 left-0 flex flex-row flex-nowrap p-1 bg-black/50">
             <ul class="flex-1 flex flex-row flex-nowrap gap-1 overflow-hidden">
               <For each={categories()}>
