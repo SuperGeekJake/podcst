@@ -1,85 +1,14 @@
 import {
   Component,
-  createMemo,
   createResource,
-  createSignal,
-  For,
 } from "solid-js";
 
 import { getTopPodcasts } from "@src/api";
-import { ChevronLeftSvg, ChevronRightSvg } from "@src/svg";
-import { Preview } from "@src/preview";
+import { PodcastsGrid } from "./PodcastsGrid";
 
 export const CategoryTop: Component = () => {
-  let carousel: HTMLDivElement;
-  let articles: HTMLElement[] = [];
-  const [pagination, setPagination] = createSignal<number>(0);
-  const [data] = createResource(() => getTopPodcasts());
-
-  const handleChange = (direction: -1 | 1) => {
-    const index = Math.max(
-      Math.min(
-        pagination() + direction * COLUMN_COUNT,
-        (data() || []).length - 1
-      ),
-      0
-    );
-    if (index === pagination()) return;
-
-    const element = articles[index];
-    const offset = articles[0].offsetLeft;
-    carousel.scrollBy({
-      top: 0,
-      left: element.offsetLeft - offset - carousel.scrollLeft,
-    });
-    setPagination(index);
-  };
-
-  const showLeftNavigation = createMemo(() => pagination() > 0);
-  const showRightNavigation = createMemo(
-    () => pagination() < (data() || []).length - 1
-  );
-
+  const [data] = createResource(getTopPodcasts);
   return (
-    <div class="group">
-      <h3 class="font-display text-2xl ml-12 mb-4">Popular</h3>
-      <div class="relative">
-        <button
-          classList={{
-            hidden: !showLeftNavigation(),
-            block: showLeftNavigation(),
-          }}
-          class="absolute z-10 top-0 left-0 w-12 h-full bg-slate-900/40 group-hover:bg-slate-900/60 transition-all"
-          onClick={() => handleChange(-1)}
-        >
-          <ChevronLeftSvg class="block h-12 w-auto fill-white opacity-0 group-hover:opacity-100 transition-all" />
-        </button>
-        <div
-          ref={(ref) => (carousel = ref)}
-          class="flex flex-nowrap overflow-x-hidden scroll-smooth px-12 gap-[1%]"
-        >
-          <For each={data()} fallback={<div>Loading...</div>}>
-            {(podcast, index) => (
-              <Preview
-                ref={(ref) => (articles[index()] = ref)}
-                podcast={podcast}
-              />
-            )}
-          </For>
-        </div>
-        <button
-          classList={{
-            hidden: !showRightNavigation(),
-            block: showRightNavigation(),
-          }}
-          class="absolute z-10 top-0 right-0 w-12 h-full bg-slate-900/40 group-hover:bg-slate-900/60 transition-all"
-          onClick={() => handleChange(1)}
-        >
-          <ChevronRightSvg class="block h-12 w-auto fill-white opacity-0 group-hover:opacity-100 transition-all" />
-        </button>
-      </div>
-    </div>
+    <PodcastsGrid title="Popular" podcasts={data} />
   );
 };
-
-const COLUMN_COUNT = 6;
