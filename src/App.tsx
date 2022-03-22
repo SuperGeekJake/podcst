@@ -10,8 +10,8 @@ import { Episodes } from "./episodes";
 const App: Component = () => {
   return (
     <Router>
-      <SubscriptionsProvider>
-        <MediaProvider>
+      <MediaProvider>
+        <SubscriptionsProvider>
           <Header />
           <Routes>
             <Route path="/episodes" element={<Episodes />} />
@@ -19,8 +19,8 @@ const App: Component = () => {
             <Route path="/*all" element={<div>Page Not Found</div>} />
           </Routes>
           <MediaControls />
-        </MediaProvider>
-      </SubscriptionsProvider>
+        </SubscriptionsProvider>
+      </MediaProvider>
     </Router>
   );
 };

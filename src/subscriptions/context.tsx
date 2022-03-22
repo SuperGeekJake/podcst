@@ -1,61 +1,90 @@
 import {
-  Accessor,
   Component,
   createContext,
-  createMemo,
   onMount,
   useContext,
+  createEffect,
+  createMemo,
+  Accessor,
 } from "solid-js";
-import { createStore, DeepReadonly } from "solid-js/store";
+import { DeepReadonly, createStore, produce, unwrap } from "solid-js/store";
 
-import { subscriptions, SubscriptionsState } from "./subscriptions";
+import { getValue, setValue } from "@src/storage/idb";
 
-interface SubscriptionsContextValue extends SubscriptionsState {
-  subscriptionList: Accessor<DeepReadonly<App.PodcastEpisodesSubInfo[]>>;
+interface SubscriptionsState {
+  subs: App.SubscriptionsMap;
+  subscriptionList: App.PodcastEpisodesSubInfo[];
 }
 
-type ContextValue = DeepReadonly<SubscriptionsContextValue>;
+type ContextValue = [
+  DeepReadonly<SubscriptionsState>,
+  {
+    addSubscription: (feed: string, listing: App.EpisodeListing) => void;
+    removeSubscription: (feed: string) => void;
+    toggleSubscription: (feed: string, listing: App.EpisodeListing) => void;
+  }
+];
 
-export const SubscriptionsContext = createContext<ContextValue | undefined>(
-  undefined
-);
+export const SubscriptionsContext = createContext<ContextValue | []>([]);
 
 export const useSubscriptionsContext = () => {
   const context = useContext(SubscriptionsContext);
-  if (!context)
+  if (!context.length)
     throw new Error("useSubscriptionsContext has been used outside provider");
   return context;
 };
 
 export const SubscriptionsProvider: Component = (props) => {
-  const [state, setState] = createStore<SubscriptionsState["subs"]>(
-    subscriptions.subs
+  let subscriptionList: Accessor<App.PodcastEpisodesSubInfo[]>;
+  const [state, setState] = createStore<SubscriptionsState>({
+    subs: {},
+    get subscriptionList() {
+      return subscriptionList();
+    },
+  });
+
+  subscriptionList = createMemo(() =>
+    Object.values<App.PodcastEpisodesSubInfo>({
+      ...state.subs,
+    } as App.SubscriptionsMap)
   );
 
-  const updateState =
-    <T extends (...args: any[]) => Promise<App.SubscriptionsMap>>(fn: T) =>
-    async (...args: Parameters<T>) => {
-      const result = await fn(...args);
-      setState(subscriptions.subs);
-      return result;
-    };
+  const value: ContextValue = [
+    state,
+    {
+      addSubscription: (feed, listing) => {
+        setState(
+          produce((s) => {
+            s.subs[feed] = { ...listing, feed };
+          })
+        );
+      },
+      removeSubscription: (feed) => {
+        setState(
+          produce((s) => {
+            delete s.subs[feed];
+          })
+        );
+      },
+      toggleSubscription: (feed, listing) => {
+        const [, { removeSubscription, addSubscription }] = value;
+        state.subs[feed]
+          ? removeSubscription(feed)
+          : addSubscription(feed, listing);
+      },
+    },
+  ];
 
-  const subscriptionList = createMemo(() => Object.values(state));
+  onMount(async () => {
+    const subs = await getValue("subscriptions");
 
-  const value: ContextValue = {
-    subs: state,
-    lastSync: subscriptions.lastSync,
-    init: updateState(subscriptions.init),
-    addSubscription: updateState(subscriptions.addSubscription),
-    removeSubscription: updateState(subscriptions.removeSubscription),
-    toggleSubscription: updateState(subscriptions.toggleSubscription),
-    addSubscriptions: updateState(subscriptions.addSubscriptions),
-    syncSubscription: updateState(subscriptions.syncSubscription),
-    syncAllSubscriptions: updateState(subscriptions.syncAllSubscriptions),
-    subscriptionList,
-  };
+    if (!subs) return;
+    setState("subs", subs);
+  });
 
-  onMount(value.init);
+  createEffect(() => {
+    setValue("subscriptions", unwrap(state.subs));
+  });
 
   return (
     <SubscriptionsContext.Provider value={value}>

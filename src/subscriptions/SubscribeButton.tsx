@@ -1,26 +1,24 @@
-import { Component } from "solid-js";
-import { Button, ButtonProps } from "@src/ui/Button";
+import { Component, createMemo } from "solid-js";
 import { useSubscriptionsContext } from "./context";
 
-export interface SubscribeButtonProps
-  extends Omit<ButtonProps, "onClick" | "data-is-active"> {
-  class?: string;
+export const SubscribeButton: Component<{
   feed: string;
   podcast: App.EpisodeListing;
-}
-
-export const SubscribeButton: Component<SubscribeButtonProps> = (props) => {
-  const { subs, toggleSubscription } = useSubscriptionsContext();
-  const isSubscribed = props.feed in subs;
-  const handleClick = () => toggleSubscription(props.feed, props.podcast);
+}> = (props) => {
+  const [state, actions] = useSubscriptionsContext();
+  const isSubscribed = createMemo(() => props.feed in state.subs);
+  const handleClick = () =>
+    actions.toggleSubscription(props.feed, props.podcast);
   return (
-    <Button
-      class={props.class}
-      data-is-active={isSubscribed}
+    <button
+      class="flex justify-center items-center py-2 px-6 text-white text-sm font-bold font-display uppercase tracking-wide rounded-md"
+      classList={{
+        "bg-red-700 hover:bg-red-600 focus:bg-red-600": isSubscribed(),
+        "bg-amber-700 hover:bg-amber-600 focus:bg-amber-600": !isSubscribed(),
+      }}
       onClick={handleClick}
-      {...props}
     >
-      {isSubscribed ? "Unsubscribe" : "Subscribe"}
-    </Button>
+      {isSubscribed() ? "Unsubscribe" : "Subscribe"}
+    </button>
   );
 };
