@@ -1,12 +1,10 @@
 import { Component, createSignal, onCleanup, Show } from "solid-js";
 import { Portal } from "solid-js/web";
-import { Link } from 'solid-app-router'
+import { Link } from "solid-app-router";
 
 import { getPodcast } from "@src/api";
 import { Modal } from "./Modal";
-import { registerDirectives, forwardRef } from "@src/directives";
 
-registerDirectives(forwardRef);
 export const Preview: Component<{
   ref: (ref: HTMLAnchorElement) => void;
   podcast: App.Podcast;
@@ -43,7 +41,6 @@ export const Preview: Component<{
         href={`/episodes?feed=${props.podcast.feed}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        use:forwardRef={props.ref}
       >
         <img
           class="rounded-lg"
