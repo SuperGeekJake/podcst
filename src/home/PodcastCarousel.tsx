@@ -1,20 +1,13 @@
-import {
-  Component,
-  createMemo,
-  createSignal,
-  For,
-} from "solid-js";
+import { Component, createMemo, createSignal, For } from "solid-js";
 import { DeepReadonly } from "solid-js/store";
 
 import { ChevronLeftSvg, ChevronRightSvg } from "@src/svg";
 import { Preview } from "@src/preview";
 
-interface PodcastsGridProps {
+export const PodcastCarousel: Component<{
   title: string;
   podcasts: DeepReadonly<App.Podcast[]>;
-}
-
-export const PodcastsGrid: Component<PodcastsGridProps> = (props) => {
+}> = (props) => {
   let carousel: HTMLDivElement;
   let articles: HTMLElement[] = [];
   const [pagination, setPagination] = createSignal<number>(0);

@@ -1,17 +1,16 @@
-import {
-  Component,
-} from "solid-js";
+import { Component, Show } from "solid-js";
 
-import { PodcastsGrid } from "./PodcastsGrid";
+import { PodcastCarousel } from "./PodcastCarousel";
 import { useSubscriptionsContext } from "@src/subscriptions";
 
 export const CategorySubs: Component = () => {
-  const store = useSubscriptionsContext();
-  const { subscriptionList } = store;
-  if (subscriptionList().length === 0) {
-    return null;
-  }
+  const [state] = useSubscriptionsContext();
   return (
-    <PodcastsGrid title="Subscriptions" podcasts={subscriptionList()} />
+    <Show when={state.subscriptionList.length > 0}>
+      <PodcastCarousel
+        title="Subscriptions"
+        podcasts={state.subscriptionList}
+      />
+    </Show>
   );
 };

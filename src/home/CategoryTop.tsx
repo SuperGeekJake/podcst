@@ -1,14 +1,9 @@
-import {
-  Component,
-  createResource,
-} from "solid-js";
+import { Component, createResource } from "solid-js";
 
 import { getTopPodcasts } from "@src/api";
-import { PodcastsGrid } from "./PodcastsGrid";
+import { PodcastCarousel } from "./PodcastCarousel";
 
 export const CategoryTop: Component = () => {
   const [data] = createResource(getTopPodcasts);
-  return (
-    <PodcastsGrid title="Popular" podcasts={data() || []} />
-  );
+  return <PodcastCarousel title="Popular" podcasts={data() || []} />;
 };
