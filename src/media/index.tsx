@@ -1,8 +1,9 @@
-import { Component, For } from "solid-js";
+import { Component } from "solid-js";
 import { Transition } from "solid-transition-group";
 
 import { MediaBar } from "./MediaBar";
 import { useMediaContext } from "./context";
+import { PlaylistView } from "./PlaylistView";
 
 export * from "./context";
 
@@ -16,14 +17,7 @@ export const MediaControls: Component = () => {
         exitClass="translate-y-0"
         exitToClass="translate-y-full"
       >
-        {state.showPlaylist && (
-          <div class="fixed z-10 top-0 left-0 right-0 bottom-0 bg-slate-900 transition-transform">
-            Playlist View
-            <For each={state.playlist}>
-              {(episode) => <div>{episode.title}</div>}
-            </For>
-          </div>
-        )}
+        {state.showPlaylist && <PlaylistView />}
       </Transition>
       <Transition
         enterClass="translate-y-24"
