@@ -45,7 +45,7 @@ export const Hero: Component = () => {
               </button>
             </li>
             <li>
-              <a class="flex justify-center items-center h-10 px-6 text-white text-sm font-bold font-display uppercase tracking-wide bg-white/20 rounded-full">
+              <a class="flex justify-center items-center h-10 px-6 text-white text-sm font-bold font-display uppercase tracking-wide bg-white/20 rounded-md">
                 More Info
               </a>
             </li>

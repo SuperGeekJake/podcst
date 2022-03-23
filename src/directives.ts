@@ -1,6 +1,6 @@
 import { Accessor } from "solid-js";
 
-type Directive = typeof fullsize | typeof forwardRef;
+type Directive = typeof fullsize;
 
 export function registerDirectives(...directives: Directive[]) {}
 
@@ -14,11 +14,4 @@ export function fullsize(
   };
 
   mockImage.src = fullsizeSrc();
-}
-
-export function forwardRef(
-  ref: HTMLElement,
-  callback: (ref: HTMLElement) => void
-) {
-  callback(ref);
 }
