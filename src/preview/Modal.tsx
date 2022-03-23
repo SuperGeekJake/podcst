@@ -117,7 +117,7 @@ export const Modal: Component<{
       <div
         data-component="Preview.Modal.container"
         ref={(ref) => (container = ref)}
-        class="absolute z-20 w-1/5 aspect-square"
+        class="absolute z-20 w-1/5 aspect-square transform"
         style={getContainerStyles(coords())}
       >
         <div
@@ -157,7 +157,7 @@ export const Modal: Component<{
             </Show>
           </div>
           <button
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group flex justify-center items-center w-24 h-24 bg-black/50 hover:bg-black focus:bg-black rounded-full transition-all"
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group flex justify-center items-center w-24 h-24 bg-black/30 hover:bg-black/80 focus:bg-black/80 rounded-full transition-all"
             aria-label="Play"
             title="Play"
             onClick={() => {
@@ -170,7 +170,7 @@ export const Modal: Component<{
               props.onMouseLeave();
             }}
           >
-            <PlaySvg class="w-auto h-14 fill-white/50 group-hover:fill-white group-focus:fill-white" />
+            <PlaySvg class="w-auto h-14 fill-white/30 group-hover:fill-white/80 group-focus:fill-white/80" />
           </button>
         </div>
       </div>
@@ -187,8 +187,8 @@ const calcMiddleSprite = (duration: number): [number, number] => {
 };
 
 const getContainerStyles = (coords?: [number, number]) => {
-  if (!coords) return "transform: translate(-100%, -100%)";
-  return `transform: translate(${coords[0]}px, ${coords[1]}px)`;
+  if (!coords) return "--tw-translate-x: -100%; --tw-translate-y: -100%";
+  return `--tw-translate-x: ${coords[0]}px; --tw-translate-y: ${coords[1]}px`;
 };
 
 const isInViewport = (element: Element) => {
