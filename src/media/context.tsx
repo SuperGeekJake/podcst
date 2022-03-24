@@ -30,6 +30,7 @@ type ContextValue = [
     toggle: () => void;
     togglePlaylist: (value: boolean) => void;
     volume: (value: number) => void;
+    track: (next: number) => void;
   }
 ];
 
@@ -115,6 +116,16 @@ export const MediaProvider: Component = (props) => {
       volume: (value) => {
         setState({ volume: value });
         Howler.volume(value);
+      },
+      track: (next: number) => {
+        if (next < 0 || next > state.playlist.length) return;
+        setState({
+          duration: 0,
+          error: null,
+          seek: 0,
+          status: "loading",
+          track: next,
+        });
       },
     },
   ];
