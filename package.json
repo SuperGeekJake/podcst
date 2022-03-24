@@ -1,7 +1,28 @@
 {
-  "name": "vite-template-solid",
-  "version": "0.0.0",
-  "description": "",
+  "name": "podcst",
+  "version": "0.1.0",
+  "description": "A short maximum 100 character description for your SolidHack submission goes here.",
+  "info": "This is a long format description of the project with a maximum of 750 characters.",
+  "homepage": "https://podcst.vercel.app/",
+  "contributors": [
+    {
+      "name": "Jacob Williams",
+      "url": "https://github.com/SuperGeekJake"
+    },
+    {
+      "name": "Shantanu Raj",
+      "url": "https://github.com/shantanuraj"
+    },
+    {
+      "name": "Patrick Sobrak-Seaton",
+      "url": "https://github.com/psobrakseaton"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "solidhack",
+    "best_app"
+  ],
   "scripts": {
     "start": "vite",
     "dev": "vite",
@@ -9,7 +30,6 @@
     "serve": "vite preview",
     "test": "jest"
   },
-  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.16.11",
